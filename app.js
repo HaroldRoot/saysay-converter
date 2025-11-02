@@ -28,7 +28,7 @@ window.addEventListener('DOMContentLoaded', () => {
             conversionRegex = new RegExp(escapedKeys.join('|'), 'g');
 
             convertButton.disabled = false;
-            convertButton.textContent = '🚀 转换表情代码';
+            convertButton.textContent = '🚀 转换成 emoji';
 
         } catch (error) {
             console.error('加载 mapping.json 失败:', error);

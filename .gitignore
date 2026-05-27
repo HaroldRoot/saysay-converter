@@ -1,0 +1,25 @@
+# Android Studio / Gradle build outputs
+android/build/
+android/app/build/
+android/.gradle/
+android/local.properties
+android/captures/
+android/.cxx/
+android/app/release/
+android/app/debug/
+
+# IntelliJ / Android Studio metadata
+android/.idea/
+android/*.iml
+android/app/*.iml
+
+# Signing keystores (must never be committed)
+android/**/*.jks
+android/**/*.keystore
+android/keystore.properties
+
+# Web assets copied at build time from the repo root
+android/app/src/main/assets/web/
+
+# Skills tooling: synced from sources listed in skills-lock.json
+.agents/

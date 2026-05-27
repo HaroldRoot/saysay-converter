@@ -3,21 +3,452 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QQ空间表情符号转换</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="把 QQ 空间说说里的 [em]e400xxx[/em] 一键还原成真实 emoji，复制即用。">
+    <meta name="theme-color" content="#F4EFE6">
+    <title>说说 emoji 还原 · QZone Toolkit</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #F4EFE6;
+            --bg-tint: #ECE3D2;
+            --surface: rgba(255, 253, 249, 0.74);
+            --surface-strong: #FBF8F2;
+            --ink: #1B1814;
+            --ink-soft: #5C544A;
+            --ink-mute: #8E867B;
+            --line: rgba(27, 24, 20, 0.08);
+            --line-strong: rgba(27, 24, 20, 0.18);
+            --accent: #B7410E;
+            --accent-deep: #8C2F08;
+            --accent-soft: rgba(183, 65, 14, 0.10);
+            --ok: #2F6F4E;
+            --err: #7A1F12;
+            --shadow-md: 0 14px 36px -16px rgba(76, 50, 30, 0.22), 0 2px 6px rgba(76, 50, 30, 0.05);
+            --shadow-btn: 0 10px 24px -10px rgba(27, 24, 20, 0.45);
+            --radius-sm: 10px;
+            --radius-md: 14px;
+            --radius-lg: 22px;
+            --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100dvh;
+            overflow: hidden;
+        }
 
         body {
-            font-family: 'Inter', sans-serif;
-            text-autospace: normal;
+            font-family: var(--font-sans);
+            color: var(--ink);
+            background: var(--bg);
+            background-image:
+                radial-gradient(1100px 760px at 88% -8%, rgba(183, 65, 14, 0.10), transparent 60%),
+                radial-gradient(900px 720px at -8% 108%, rgba(38, 70, 83, 0.07), transparent 55%),
+                linear-gradient(180deg, var(--bg) 0%, var(--bg-tint) 100%);
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
-        textarea {
-            min-height: 150px;
+        .grain {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.45;
+            mix-blend-mode: multiply;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.06 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+        }
+
+        .app {
+            position: relative;
+            z-index: 2;
+            height: 100dvh;
+            width: 100%;
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 32px 40px;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            gap: 22px;
+        }
+
+        .hero {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .eyebrow {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.22em;
+            color: var(--ink-mute);
+            text-transform: uppercase;
+        }
+
+        .title {
+            margin: 0;
+            font-size: clamp(26px, 3.4vw, 40px);
+            font-weight: 800;
+            letter-spacing: -0.028em;
+            line-height: 1.05;
+            text-wrap: balance;
+        }
+
+        .title em {
+            font-style: italic;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .subtitle {
+            margin: 0;
+            max-width: 60ch;
+            color: var(--ink-soft);
+            font-size: 15px;
+            line-height: 1.55;
+            text-wrap: pretty;
+        }
+
+        .subtitle code {
+            font-family: var(--font-mono);
+            font-size: 0.85em;
+            padding: 1px 6px;
+            border-radius: 6px;
+            background: var(--accent-soft);
+            color: var(--accent-deep);
+        }
+
+        .panels {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            min-height: 0;
+        }
+
+        .panel {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(14px) saturate(110%);
+            -webkit-backdrop-filter: blur(14px) saturate(110%);
+            overflow: hidden;
+            min-height: 0;
+            transition: border-color 200ms ease, box-shadow 220ms ease;
+        }
+
+        .panel:focus-within {
+            border-color: var(--line-strong);
+            box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255, 255, 255, 0.6),
+                0 0 0 3px var(--accent-soft);
+        }
+
+        .panel--output {
+            background:
+                linear-gradient(180deg, rgba(251, 248, 242, 0.86), rgba(244, 239, 230, 0.72));
+        }
+
+        .panel__head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 13px 20px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .panel__label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--ink);
+            letter-spacing: -0.005em;
+        }
+
+        .panel__label::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            border-radius: 999px;
+            background: var(--ink-mute);
+        }
+
+        .panel--input .panel__label::before {
+            background: var(--accent);
+        }
+
+        .panel--output .panel__label::before {
+            background: var(--ok);
+        }
+
+        .panel__hint {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--ink-mute);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .panel textarea {
+            flex: 1;
+            width: 100%;
+            border: 0;
+            padding: 18px 20px 20px;
+            background: transparent;
+            color: var(--ink);
+            font-family: var(--font-sans);
+            font-size: 15px;
+            line-height: 1.62;
+            resize: none;
+            outline: none;
+            min-height: 0;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(27, 24, 20, 0.18) transparent;
+        }
+
+        .panel textarea::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .panel textarea::-webkit-scrollbar-thumb {
+            background: rgba(27, 24, 20, 0.18);
+            border-radius: 999px;
+        }
+
+        .panel textarea::placeholder {
+            color: var(--ink-mute);
+            opacity: 0.65;
+        }
+
+        .actions {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 12px;
+            align-items: stretch;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-family: var(--font-sans);
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: -0.005em;
+            padding: 14px 22px;
+            min-height: 48px;
+            border-radius: var(--radius-md);
+            border: 1px solid transparent;
+            cursor: pointer;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            transition:
+                transform 160ms cubic-bezier(0.2, 0.7, 0.2, 1),
+                background-color 180ms ease,
+                box-shadow 220ms ease,
+                border-color 180ms ease,
+                color 180ms ease;
+        }
+
+        .btn:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 3px;
+        }
+
+        .btn:active {
+            transform: translateY(1px) scale(0.99);
+        }
+
+        .btn__icon {
+            display: inline-flex;
+            font-family: var(--font-mono);
+            font-weight: 500;
+            width: 18px;
+            height: 18px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn--primary {
+            background: var(--ink);
+            color: var(--surface-strong);
+            box-shadow: var(--shadow-btn), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+
+        .btn--primary:hover {
+            background: #2A241D;
+        }
+
+        .btn--primary[disabled] {
+            background: var(--ink-mute);
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .btn--secondary {
+            background: var(--accent);
+            color: #FBF8F2;
+            box-shadow: 0 10px 24px -10px rgba(183, 65, 14, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+        }
+
+        .btn--secondary:hover {
+            background: var(--accent-deep);
+        }
+
+        .btn--ghost {
+            background: transparent;
+            color: var(--ink-soft);
+            border-color: var(--line-strong);
+        }
+
+        .btn--ghost:hover {
+            background: rgba(27, 24, 20, 0.04);
+            color: var(--ink);
+            border-color: var(--ink);
+        }
+
+        .toast {
+            position: fixed;
+            top: 24px;
+            left: 50%;
+            transform: translate(-50%, -8px);
+            background: var(--ink);
+            color: var(--surface-strong);
+            padding: 10px 18px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: -0.005em;
+            box-shadow: 0 24px 56px -22px rgba(27, 24, 20, 0.55);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 220ms ease, transform 220ms cubic-bezier(0.2, 0.7, 0.2, 1);
+            z-index: 50;
+        }
+
+        .toast.is-visible {
+            opacity: 1;
+            transform: translate(-50%, 0);
+        }
+
+        .toast--ok {
+            background: var(--ok);
+        }
+
+        .toast--err {
+            background: var(--err);
+        }
+
+        .footer-note {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--ink-mute);
+            text-align: right;
+            letter-spacing: 0.04em;
+        }
+
+        .footer-note a {
+            color: inherit;
+            text-decoration: none;
+            border-bottom: 1px dotted var(--line-strong);
+            transition: color 160ms ease, border-color 160ms ease;
+        }
+
+        .footer-note a:hover {
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        @media (max-height: 720px) and (min-width: 821px) {
+            .app {
+                padding: 22px 32px;
+                gap: 16px;
+            }
+
+            .subtitle {
+                display: none;
+            }
+
+            .title {
+                font-size: 26px;
+            }
+        }
+
+        @media (max-width: 820px) {
+            .app {
+                padding: 18px 16px 16px;
+                gap: 14px;
+            }
+
+            .panels {
+                grid-template-columns: 1fr;
+                grid-template-rows: 1fr 1fr;
+                gap: 12px;
+            }
+
+            .panel__head {
+                padding: 10px 16px;
+            }
+
+            .panel textarea {
+                padding: 14px 16px 16px;
+                font-size: 14px;
+            }
+
+            .actions {
+                grid-template-columns: 1fr 1.4fr 1fr;
+                gap: 8px;
+            }
+
+            .btn {
+                padding: 12px 14px;
+                font-size: 13px;
+                min-height: 46px;
+            }
+
+            .title {
+                font-size: 24px;
+            }
+
+            .subtitle {
+                display: none;
+            }
+
+            .footer-note {
+                display: none;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .btn__label-long {
+                display: none;
+            }
         }
     </style>
+
     <script>
         var _hmt = _hmt || [];
         (function () {
@@ -29,89 +460,58 @@
     </script>
 </head>
 
-<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+<body>
 
-    <div id="app-container" class="bg-white p-6 md:p-8 rounded-xl shadow-2xl w-full max-w-lg">
+    <div class="grain" aria-hidden="true"></div>
 
-        <h1 class="text-3xl font-extrabold text-blue-600 mb-2 text-center tracking-tight">
-            QQ空间表情符号转换
-        </h1>
+    <main class="app">
 
-        <div>
-            <label for="inputText" class="block text-lg font-semibold text-gray-700 mb-2 mt-4">说说内容:</label>
-            <textarea id="inputText" rows="8"
-                class="w-full p-3 border-2 border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out resize-none placeholder-gray-400 text-sm">宅家真舒服[em]e400833[/em]不好我的前程[em]e400862[/em]宅家真舒服[em]e400833[/em]不好我的前程[em]e400862[/em]宅家真舒服[em]e400833[/em]不好我的前程[em]e400862[/em]</textarea>
-        </div>
+        <header class="hero">
+            <span class="eyebrow">QZone Toolkit · 说说还原器</span>
+            <h1 class="title">把 <em>[em]</em> 还给 emoji。</h1>
+            <p class="subtitle">把 QQ 空间说说里的 <code>[em]e400833[/em]</code> 一键还原成可读、可复制的真实
+                emoji，原文里的纯文本不会被打扰。</p>
+        </header>
 
-        <button id="convertButton"
-            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-lg transition duration-300 ease-in-out transform hover:scale-[1.01] active:scale-[0.98] focus:outline-none focus:ring-4 focus:ring-blue-300 mt-2">
-            🚀 转换成 emoji
-        </button>
+        <section class="panels" aria-label="转换工作区">
+            <div class="panel panel--input">
+                <div class="panel__head">
+                    <span class="panel__label" id="inputLabel">说说原文</span>
+                    <span class="panel__hint" id="inputCount" aria-live="polite">0 字</span>
+                </div>
+                <label for="inputText" class="visually-hidden" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">说说原文</label>
+                <textarea id="inputText" spellcheck="false"
+                    placeholder="把含有 [em]e400xxx[/em] 的说说粘贴到这里…">宅家真舒服[em]e400833[/em]不好我的前程[em]e400862[/em]宅家真舒服[em]e400833[/em]不好我的前程[em]e400862[/em]</textarea>
+            </div>
 
-        <div>
-            <label for="outputText" class="block text-lg font-semibold text-gray-700 mb-2 mt-4">转换结果:</label>
-            <textarea id="outputText" rows="8" readonly
-                class="w-full p-3 border-2 border-gray-300 bg-gray-50 text-gray-700 rounded-lg resize-none text-sm"></textarea>
-        </div>
+            <div class="panel panel--output">
+                <div class="panel__head">
+                    <span class="panel__label">转换结果</span>
+                    <span class="panel__hint" id="outputCount" aria-live="polite">0 字</span>
+                </div>
+                <label for="outputText" class="visually-hidden" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">转换结果</label>
+                <textarea id="outputText" spellcheck="false" readonly placeholder="转换后的可读文本会出现在这里…"></textarea>
+            </div>
+        </section>
 
-        <button id="copyButton"
-            class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-xl shadow-lg transition duration-300 ease-in-out transform hover:scale-[1.01] active:scale-[0.98] focus:outline-none focus:ring-4 focus:ring-green-300 mt-2">
-            📋 复制到剪贴板
-        </button>
-    </div>
+        <footer class="actions" aria-label="操作">
+            <button id="clearButton" class="btn btn--ghost" type="button" title="清空输入框">
+                <span class="btn__icon" aria-hidden="true">↺</span>
+                <span>清空输入</span>
+            </button>
+            <button id="convertButton" class="btn btn--primary" type="button">
+                <span class="btn__icon" aria-hidden="true">→</span>
+                <span><span class="btn__label-long">转换成 </span>emoji</span>
+            </button>
+            <button id="copyButton" class="btn btn--secondary" type="button" title="复制转换结果">
+                <span class="btn__icon" aria-hidden="true">⎘</span>
+                <span>复制结果</span>
+            </button>
+        </footer>
 
-    <script>
-        function showMessage(message, type = 'success') {
-            const container = document.body;
-            let messageBox = document.getElementById('messageBox');
+    </main>
 
-            if (!messageBox) {
-                messageBox = document.createElement('div');
-                messageBox.id = 'messageBox';
-                messageBox.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 p-3 rounded-lg shadow-xl opacity-0 transition-opacity duration-300 z-50 text-white font-semibold text-center';
-                container.appendChild(messageBox);
-            }
-
-            let bgColor = 'bg-blue-500';
-            if (type === 'success') {
-                bgColor = 'bg-green-500';
-            } else if (type === 'error') {
-                bgColor = 'bg-red-500';
-            }
-
-            messageBox.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 p-3 rounded-lg shadow-xl opacity-0 transition-opacity duration-300 z-50 text-white font-semibold text-center ' + bgColor;
-            messageBox.textContent = message;
-
-            messageBox.style.opacity = 1;
-
-            clearTimeout(messageBox.timer);
-            messageBox.timer = setTimeout(() => {
-                messageBox.style.opacity = 0;
-            }, 3000);
-        }
-
-        document.getElementById('copyButton').addEventListener('click', function () {
-            const outputTextarea = document.getElementById('outputText');
-
-            if (!outputTextarea.value) {
-                showMessage('输出内容为空，无需复制。', 'error');
-                return;
-            }
-
-            outputTextarea.select();
-
-            try {
-                const successful = document.execCommand('copy');
-                if (successful) {
-                    showMessage('✅ 成功复制到剪贴板！');
-                } else {
-                    showMessage('复制失败，请手动选择并复制。', 'error');
-                }
-            } catch (err) {
-                showMessage('复制操作出现错误。', 'error');
-            }
-        });
-    </script>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
     <script src="app.js"></script>
 </body>

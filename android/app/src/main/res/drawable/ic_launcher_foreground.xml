@@ -1,0 +1,36 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!--
+      Foreground sits on a 108x108 canvas; the safe zone is the centered 72x72.
+      Two concentric rounded squares evoke the side-by-side input/output panels
+      in the actual app UI.
+    -->
+    <path
+        android:pathData="M30,38 L78,38 A6,6 0 0 1 84,44 L84,64 A6,6 0 0 1 78,70 L30,70 A6,6 0 0 1 24,64 L24,44 A6,6 0 0 1 30,38 Z"
+        android:strokeColor="#B7410E"
+        android:strokeWidth="3.5"
+        android:fillColor="#00000000" />
+
+    <path
+        android:pathData="M54,50 L54,58"
+        android:strokeColor="#B7410E"
+        android:strokeWidth="3.5"
+        android:strokeLineCap="round" />
+
+    <path
+        android:pathData="M38,54 L46,54"
+        android:strokeColor="#1B1814"
+        android:strokeWidth="3"
+        android:strokeLineCap="round" />
+
+    <path
+        android:pathData="M62,54 L70,54"
+        android:strokeColor="#1B1814"
+        android:strokeWidth="3"
+        android:strokeLineCap="round" />
+
+</vector>

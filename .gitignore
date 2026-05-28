@@ -23,3 +23,7 @@ android/app/src/main/assets/web/
 
 # Skills tooling: synced from sources listed in skills-lock.json
 .agents/
+
+*.py
+*.txt
+*.bak

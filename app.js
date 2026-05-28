@@ -118,6 +118,35 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    const more = document.getElementById('more');
+    const moreButton = document.getElementById('moreButton');
+    const moreMenu = document.getElementById('moreMenu');
+
+    function setMoreOpen(open) {
+        more.classList.toggle('is-open', open);
+        moreButton.setAttribute('aria-expanded', String(open));
+    }
+
+    moreButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        setMoreOpen(!more.classList.contains('is-open'));
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!more.contains(e.target)) setMoreOpen(false);
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && more.classList.contains('is-open')) {
+            setMoreOpen(false);
+            moreButton.focus();
+        }
+    });
+
+    moreMenu.addEventListener('click', (e) => {
+        if (e.target.closest('.more__item')) setMoreOpen(false);
+    });
+
     updateCounts();
     loadMapping();
 });

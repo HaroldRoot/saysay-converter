@@ -1,6 +1,7 @@
 package io.github.haroldroot.saysay
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.webkit.WebResourceRequest
@@ -47,6 +48,28 @@ class MainActivity : ComponentActivity() {
                     view: WebView,
                     request: WebResourceRequest
                 ): WebResourceResponse? = assetLoader.shouldInterceptRequest(request.url)
+
+                override fun shouldOverrideUrlLoading(
+                    view: WebView,
+                    request: WebResourceRequest
+                ): Boolean {
+                    val url = request.url
+                    val scheme = url.scheme
+                    if ((scheme == "http" || scheme == "https") &&
+                        url.host != "appassets.androidplatform.net"
+                    ) {
+                        try {
+                            val intent = Intent(Intent.ACTION_VIEW, url).apply {
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            }
+                            startActivity(intent)
+                        } catch (_: Exception) {
+                            return false
+                        }
+                        return true
+                    }
+                    return false
+                }
             }
 
             visibility = View.VISIBLE
